@@ -16,7 +16,7 @@ const Todolist = () => {
     const [edit, setEdit] = useState(false);
 
     useEffect(() => {
-        console.log("DidMount");
+        console.log("Component Did Mount");
         callApi();
     }, []);
 
@@ -148,7 +148,6 @@ const Todolist = () => {
     }
 
     const ModalItems = () => {
-        console.log("taskList", taskList);
         let itemModal = [...taskList];
         let showItemsModal = itemModal.filter(({ id }) => {
             return id == itemShow
