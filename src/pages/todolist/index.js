@@ -173,11 +173,11 @@ const Todolist = () => {
                                 <Form>
                                     <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Judul Task</Form.Label>
-                                        <Form.Control defaultValue={showItemsModal[0]?.title}  onChange={e => { setTitle(e.target.value) }} autoComplete="off" placeholder={'title'} />
+                                        <Form.Control defaultValue={showItemsModal[0]?.title} onFocus={e => {setTitle(e.target.value)}}  onChange={e => { setTitle(e.target.value) }} autoComplete="off" placeholder={'title'} />
                                     </Form.Group>
                                     <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Deskripsi Task</Form.Label>
-                                        <Form.Control defaultValue={showItemsModal[0]?.description}  onChange={e => { setDesc(e.target.value) }} autoComplete="off" placeholder={'description'} />
+                                        <Form.Control defaultValue={showItemsModal[0]?.description} onFocus={e => {setTitle(e.target.value)}}  onChange={e => { setDesc(e.target.value) }} autoComplete="off" placeholder={'description'} />
                                     </Form.Group>
                                 </Form>
                                 <Button variant="success" onClick={() => editTask()}>Simpan Perubahan</Button>
