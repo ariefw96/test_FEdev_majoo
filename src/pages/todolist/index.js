@@ -144,6 +144,7 @@ const Todolist = () => {
 
     const clickToShow = (id) => {
         setItemShow(id);
+        setEdit(false);
         setModalShow(true);
     }
 
