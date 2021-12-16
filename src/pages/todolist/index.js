@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Navbar, Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
+import { useSelector, useDispatch } from 'react-redux'
+import { setTask, addTaskBelumSelesai, addTaskSelesai } from '../../utils/redux/actions'
 import Column from '../../component/Column';
 import Swal from 'sweetalert2'
 
 const Todolist = () => {
-    const [hello, setHello] = useState('To Do List');
+    const { menu, taskList, taskSelesai, taskBelumSelesai } = useSelector((state) => state.todo);
+    const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('')
-    const [taskList, setTaskList] = useState([]);
-    const [menu, setMenu] = useState(['Belum Selesai', 'Selesai']);
-    const [finish, setFinish] = useState([]);
-    const [unfinish, setUnfinish] = useState([]);
     const [itemShow, setItemShow] = useState();
     const [modalShow, setModalShow] = useState(false);
     const [modalTaskShow, setModalTaskShow] = useState(false);
@@ -30,9 +29,8 @@ const Todolist = () => {
         let taskBelumSelesai = taskMajoo.filter(({ id, status }) => {
             return status == 0;
         })
-
-        setFinish([...taskSelesai]);
-        setUnfinish([...taskBelumSelesai]);
+        dispatch(addTaskBelumSelesai(taskBelumSelesai));
+        dispatch(addTaskSelesai(taskSelesai));
     }, [taskList])
 
     const pindahSelesai = () => {
@@ -46,7 +44,7 @@ const Todolist = () => {
                 break;
             }
         }
-        setTaskList([...tempTaskList]);
+        dispatch(setTask(tempTaskList));
         setModalShow(false);
     }
 
@@ -61,7 +59,7 @@ const Todolist = () => {
                 break;
             }
         }
-        setTaskList([...tempTaskList]);
+        dispatch(setTask(tempTaskList));
         setModalShow(false);
     }
 
@@ -70,7 +68,7 @@ const Todolist = () => {
             const url = 'https://virtserver.swaggerhub.com/hanabyan/todo/1.0.0/to-do-list'
             const data = await fetch(url);
             const resp = await data.json();
-            setTaskList(resp);
+            dispatch(setTask(resp));
         } catch (e) {
             Swal.fire({
                 icon: 'error',
@@ -92,7 +90,7 @@ const Todolist = () => {
             })
             setTitle('');
             setDesc('');
-            setTaskList([...tempTaskList]);
+            dispatch(setTask(tempTaskList));
             setModalTaskShow(false);
             Swal.fire({
                 icon: 'success',
@@ -109,7 +107,7 @@ const Todolist = () => {
         }
     }
 
-    const editTask = () =>{
+    const editTask = () => {
         const id = itemShow;
         let tempTaskList = [...taskList];
         for (let i = 0; i < tempTaskList.length; i++) {
@@ -120,7 +118,7 @@ const Todolist = () => {
                 break;
             }
         }
-        setTaskList([...tempTaskList]);
+        dispatch(setTask(tempTaskList));
         setEdit(false);
         setModalShow(false);
         setTitle('');
@@ -135,7 +133,7 @@ const Todolist = () => {
     const deleteTask = () => {
         let tempTaskList = [...taskList];
         let newTaskList = tempTaskList.filter(({ id }) => id != itemShow);
-        setTaskList([...newTaskList]);
+        dispatch(setTask(newTaskList));
         setModalShow(false);
         Swal.fire({
             icon: 'success',
@@ -150,6 +148,7 @@ const Todolist = () => {
     }
 
     const ModalItems = () => {
+        console.log("taskList", taskList);
         let itemModal = [...taskList];
         let showItemsModal = itemModal.filter(({ id }) => {
             return id == itemShow
@@ -166,18 +165,18 @@ const Todolist = () => {
                         <li>Status : {showItemsModal[0]?.status}</li>
                         <li>Waktu : {showItemsModal[0]?.createdAt}</li>
                     </ul>
-                    <p onClick={() => setEdit(!edit)} style={{textDecoration:'underline'}}>Klik disini untuk edit data</p>
+                    <p onClick={() => setEdit(!edit)} style={{ textDecoration: 'underline' }}>Klik disini untuk edit data</p>
                     {
                         edit ? (
                             <>
                                 <Form>
                                     <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Judul Task</Form.Label>
-                                        <Form.Control defaultValue={showItemsModal[0]?.title} onFocus={e => {setTitle(e.target.value)}}  onChange={e => { setTitle(e.target.value) }} autoComplete="off" placeholder={'title'} />
+                                        <Form.Control defaultValue={showItemsModal[0]?.title} onFocus={e => { setTitle(e.target.value) }} onChange={e => { setTitle(e.target.value) }} autoComplete="off" placeholder={'title'} />
                                     </Form.Group>
                                     <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Deskripsi Task</Form.Label>
-                                        <Form.Control defaultValue={showItemsModal[0]?.description} onFocus={e => {setTitle(e.target.value)}}  onChange={e => { setDesc(e.target.value) }} autoComplete="off" placeholder={'description'} />
+                                        <Form.Control defaultValue={showItemsModal[0]?.description} onFocus={e => { setTitle(e.target.value) }} onChange={e => { setDesc(e.target.value) }} autoComplete="off" placeholder={'description'} />
                                     </Form.Group>
                                 </Form>
                                 <Button variant="success" onClick={() => editTask()}>Simpan Perubahan</Button>
@@ -254,7 +253,7 @@ const Todolist = () => {
                 <Row className="mt-3">
                     <Col>
                         {
-                            unfinish?.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(({ id, title }) => {
+                            taskBelumSelesai?.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(({ id, title }) => {
                                 return (
                                     <>
                                         {/* <div>{id}</div> */}
@@ -266,7 +265,7 @@ const Todolist = () => {
                     </Col>
                     <Col>
                         {
-                            finish?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(({ id, title }) => {
+                            taskSelesai?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(({ id, title }) => {
                                 return (
                                     <>
                                         {/* <div>{id}</div> */}
