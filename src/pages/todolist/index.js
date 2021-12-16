@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Nav, Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
+import { Navbar, Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
 import Column from '../../component/Column';
-import Content from '../../component/Content';
 import Swal from 'sweetalert2'
 
 const Todolist = () => {
@@ -15,6 +14,7 @@ const Todolist = () => {
     const [itemShow, setItemShow] = useState();
     const [modalShow, setModalShow] = useState(false);
     const [modalTaskShow, setModalTaskShow] = useState(false);
+    const [edit, setEdit] = useState(false);
 
     useEffect(() => {
         console.log("DidMount");
@@ -23,7 +23,6 @@ const Todolist = () => {
 
     useEffect(() => {
         let taskMajoo = [...taskList];
-        console.log("NewTask", taskMajoo);
         let taskSelesai = taskMajoo.filter(({ id, status }) => {
             return status == 1;
         })
@@ -91,6 +90,8 @@ const Todolist = () => {
                 status: 0,
                 createdAt: new Date().toISOString().substring(0, 16).replace("T", " ")
             })
+            setTitle('');
+            setDesc('');
             setTaskList([...tempTaskList]);
             setModalTaskShow(false);
             Swal.fire({
@@ -106,6 +107,29 @@ const Todolist = () => {
                 text: 'Task tidak boleh kosong !',
             });
         }
+    }
+
+    const editTask = () =>{
+        const id = itemShow;
+        let tempTaskList = [...taskList];
+        for (let i = 0; i < tempTaskList.length; i++) {
+            if (tempTaskList[i].id == id) {
+                tempTaskList.push({ ...tempTaskList[i], title, description: desc })
+                tempTaskList.splice(i, 1);
+                i--;
+                break;
+            }
+        }
+        setTaskList([...tempTaskList]);
+        setEdit(false);
+        setModalShow(false);
+        setTitle('');
+        setDesc('');
+        Swal.fire({
+            icon: 'success',
+            title: 'Sukses...',
+            text: 'Task berhasil diupdate.',
+        });
     }
 
     const deleteTask = () => {
@@ -125,8 +149,6 @@ const Todolist = () => {
         setModalShow(true);
     }
 
-    // console.log("re-render");
-
     const ModalItems = () => {
         let itemModal = [...taskList];
         let showItemsModal = itemModal.filter(({ id }) => {
@@ -134,7 +156,7 @@ const Todolist = () => {
         })
         let disableBtn = showItemsModal[0]?.status == 1 ? true : false
         return (
-            <Modal show={modalShow}>
+            <Modal show={modalShow} onHide={() => setModalShow(false)}>
                 <Modal.Header closeButton onClick={() => setModalShow(false)}>
                     <Modal.Title>{showItemsModal[0]?.title}</Modal.Title>
                 </Modal.Header>
@@ -144,6 +166,24 @@ const Todolist = () => {
                         <li>Status : {showItemsModal[0]?.status}</li>
                         <li>Waktu : {showItemsModal[0]?.createdAt}</li>
                     </ul>
+                    <p onClick={() => setEdit(!edit)} style={{textDecoration:'underline'}}>Klik disini untuk edit data</p>
+                    {
+                        edit ? (
+                            <>
+                                <Form>
+                                    <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Judul Task</Form.Label>
+                                        <Form.Control defaultValue={showItemsModal[0]?.title}  onChange={e => { setTitle(e.target.value) }} autoComplete="off" placeholder={'title'} />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Deskripsi Task</Form.Label>
+                                        <Form.Control defaultValue={showItemsModal[0]?.description}  onChange={e => { setDesc(e.target.value) }} autoComplete="off" placeholder={'description'} />
+                                    </Form.Group>
+                                </Form>
+                                <Button variant="success" onClick={() => editTask()}>Simpan Perubahan</Button>
+                            </>
+                        ) : ''
+                    }
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="danger" onClick={() => deleteTask()} disabled={disableBtn}>
@@ -173,11 +213,11 @@ const Todolist = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <Form.Group className="mb-3 col-sm-5" controlId="exampleForm.ControlInput1">
+                        <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
                             <Form.Label>Judul Task</Form.Label>
                             <Form.Control value={title} onChange={e => { setTitle(e.target.value) }} autoComplete="off" placeholder={'title'} />
                         </Form.Group>
-                        <Form.Group className="mb-3 col-sm-5" controlId="exampleForm.ControlInput1">
+                        <Form.Group className="mb-3 col-sm-12" controlId="exampleForm.ControlInput1">
                             <Form.Label>Deskripsi Task</Form.Label>
                             <Form.Control value={desc} onChange={e => { setDesc(e.target.value) }} autoComplete="off" placeholder={'description'} />
                         </Form.Group>
@@ -195,7 +235,11 @@ const Todolist = () => {
 
     return (
         <>
-            <Nav className="btn-success" style={{ height: '5vh' }} />
+            <Navbar className="btn-success" style={{ height: '5vh' }} >
+                <Container>
+                    <Navbar.Brand style={{ color: 'white' }}>Majoo-Indonesia</Navbar.Brand>
+                </Container>
+            </Navbar>
             <Container>
                 <h1 onClick={() => setModalTaskShow(true)}>Tambah Task</h1>
                 <Row className="mt-3">
@@ -232,10 +276,6 @@ const Todolist = () => {
                             })
                         }
                     </Col>
-                    {/* <Content arrayContent={ready} functionPrev={deleteTask} functionNext={moveToIndev} ready={true} />
-                    <Content arrayContent={dev} functionPrev={backToReady} functionNext={moveToTesting} />
-                    <Content arrayContent={test} functionPrev={backToDev} functionNext={moveToDone} />
-                    <Content arrayContent={done} functionPrev={backToTest} functionNext={null} /> */}
                 </Row>
             </Container>
             {
